@@ -11,6 +11,6 @@ since the first of the WriteLog version 11 series.
 But certain features in this demo require 12.15 or later (again, either the demo or full WriteLog install.) This demo
 source code is commented for the features that require the latest WriteLog.
 
-#VbWlClient2
+# VbWlClient2
 In the VbWlClient2 folder is a Visual Basic program that also demostrates automating WriteLog. It uses the 
 focus notification object added to WriteLog version 12.23
