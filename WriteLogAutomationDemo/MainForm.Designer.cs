@@ -35,6 +35,7 @@
             this.textBoxCWMemF2 = new System.Windows.Forms.TextBox();
             this.buttonUpdateCWMemory = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
+            this.button1 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // buttonDemoQsoCollection
@@ -93,11 +94,22 @@
             this.label2.TabIndex = 9;
             this.label2.Text = resources.GetString("label2.Text");
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(26, 157);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 10;
+            this.button1.Text = "button1";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(442, 227);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.buttonUpdateCWMemory);
             this.Controls.Add(this.textBoxCWMemF2);
@@ -108,6 +120,7 @@
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.Text = "WriteLog Automation Demo";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -122,6 +135,7 @@
         private System.Windows.Forms.TextBox textBoxCWMemF2;
         private System.Windows.Forms.Button buttonUpdateCWMemory;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Button button1;
     }
 }
 

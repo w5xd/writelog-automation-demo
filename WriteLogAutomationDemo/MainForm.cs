@@ -33,6 +33,31 @@ namespace WriteLogAutomationDemo
             InitializeComponent();
         }
 
+        /* An example of how to receive Mic Vox callbacks
+        ** Supported in WriteLog 12.82 and later
+        */
+        [ComVisible(true)]
+        public class WriteLogVoxNotifyCb : WriteLogClrTypes.IVoxNotify
+        {
+            [ComVisible(true), DispId(1)]
+            public void MicVoxChanged(short OnOff, string AudioState)
+            {
+                // if WriteLog has its Echo Microphone to Transmitters setting ON,
+                // then when the operator talks into the mic, we'll get a call here
+                //
+                // OnOff non-zero means the operator is talking
+                //       zero means the operator is not
+                //
+                // AudioState :
+                // "RECORDING" means f-key WAV file recording is in progress
+                // "PLAYING" means program message WAV file playback is in progress
+                // "NORMAL" means microphone is being fed into transmitter audio input
+                //
+            }
+        }
+
+        WriteLogVoxNotifyCb m_micVoxNotify = new WriteLogVoxNotifyCb();
+
         private void MainForm_Load(object sender, EventArgs e)
         {
             // First try to attach to a running instance of WriteLog
@@ -108,8 +133,13 @@ namespace WriteLogAutomationDemo
             if (m_WriteLogDocument == null)
                 Close();
             else  // We have connected to some WriteLog instance, so show our Form on the screen now.
+            {
                 textBoxCWMemF2.Text = m_WriteLogDocument.GetFKeyMsgCw(0); // demo changing F-key memories
+                m_VoxCookie = m_WriteLogDocument.SetMicVoxNotify(m_micVoxNotify);
+            }
         }
+
+        uint m_VoxCookie;
 
         private void buttonDemoQsoCollection_Click(object sender, EventArgs e)
         {
@@ -131,6 +161,24 @@ namespace WriteLogAutomationDemo
             textBoxCWMemF2.Text = m_WriteLogDocument.GetFKeyMsgCw(0);
         }
 
+        private void button1_Click(object sender, EventArgs e)
+        {
+            var ent = m_WriteLogDocument.CreateEntry() as WriteLogClrTypes.ISingleEntry;
+            ent = m_WriteLogDocument.GetCurrentEntry();
+            ent.SetLogFrequencyEx(3, 144100.0, 144100.0, 0);
+            ent.SetFieldN(3, "FN23");
+            ent.Callsign = "W1AW";
+            var d = ent.Dupe();
+            int i = 3;
+        }
+
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            // clean up our callback on microphone vox
+            if (m_VoxCookie != 0 && null != m_WriteLogDocument)
+                m_WriteLogDocument.CancelMicVoxNotify(m_VoxCookie);
+            m_VoxCookie = 0;
+        }
     }
 
     // class WriteLogDocument is a magic incantation to get .NET Com interop to create a fresh WriteLog instance.
