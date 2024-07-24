@@ -66,8 +66,14 @@ namespace WriteLogAutomationDemo
             }
         }
 
+        private void OnIncomingNotification(string s)
+        {
+            BeginInvoke((Action)(() => messageLabel.Text = s));
+        }
+
         private void MainForm_Load(object sender, EventArgs e)
         {
+            messageLabel.Text = "";
             // First try to attach to a running instance of WriteLog
             try
             {
@@ -143,7 +149,9 @@ namespace WriteLogAutomationDemo
             else  // We have connected to some WriteLog instance, so show our Form on the screen now.
             {
                 textBoxCWMemF2.Text = m_WriteLogDocument.GetFKeyMsgCw(0); // demo changing F-key memories
-                m_VoxCookie = m_WriteLogDocument.SetMicVoxNotify(new WriteLogVoxNotifyCb(new DisplayMessage((string s) => messageLabel.Text = s)));
+                m_VoxCookie = m_WriteLogDocument.SetMicVoxNotify(new WriteLogVoxNotifyCb(new DisplayMessage(
+                    OnIncomingNotification)
+                    ));
             }
         }
 
