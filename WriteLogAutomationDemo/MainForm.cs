@@ -33,12 +33,19 @@ namespace WriteLogAutomationDemo
             InitializeComponent();
         }
 
+        public delegate void DisplayMessage(string m);
+
         /* An example of how to receive Mic Vox callbacks
         ** Supported in WriteLog 12.82 and later
         */
         [ComVisible(true)]
         public class WriteLogVoxNotifyCb : WriteLogClrTypes.IVoxNotify
         {
+            public WriteLogVoxNotifyCb(DisplayMessage d)
+            {
+                m_msgDelegate = d;
+            }
+            protected DisplayMessage m_msgDelegate;
             [ComVisible(true), DispId(1)]
             public void MicVoxChanged(short OnOff, string AudioState)
             {
@@ -53,10 +60,11 @@ namespace WriteLogAutomationDemo
                 // "PLAYING" means program message WAV file playback is in progress
                 // "NORMAL" means microphone is being fed into transmitter audio input
                 //
+
+                if (null != m_msgDelegate)
+                    m_msgDelegate(String.Format("vox: {0}, {1}", OnOff, AudioState));
             }
         }
-
-        WriteLogVoxNotifyCb m_micVoxNotify = new WriteLogVoxNotifyCb();
 
         private void MainForm_Load(object sender, EventArgs e)
         {
@@ -135,7 +143,7 @@ namespace WriteLogAutomationDemo
             else  // We have connected to some WriteLog instance, so show our Form on the screen now.
             {
                 textBoxCWMemF2.Text = m_WriteLogDocument.GetFKeyMsgCw(0); // demo changing F-key memories
-                m_VoxCookie = m_WriteLogDocument.SetMicVoxNotify(m_micVoxNotify);
+                m_VoxCookie = m_WriteLogDocument.SetMicVoxNotify(new WriteLogVoxNotifyCb(new DisplayMessage((string s) => messageLabel.Text = s)));
             }
         }
 
