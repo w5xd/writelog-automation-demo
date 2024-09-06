@@ -33,19 +33,28 @@ namespace WriteLogAutomationDemo
             InitializeComponent();
         }
 
-        public delegate void DisplayMessage(string m);
+        public delegate void OnVoxNotification(string m);
 
         /* An example of how to receive Mic Vox callbacks
         ** Supported in WriteLog 12.82 and later
         */
         [ComVisible(true)]
-        public class WriteLogVoxNotifyCb : WriteLogClrTypes.IVoxNotify
+        public class WriteLogVoxNotifyCb 
         {
-            public WriteLogVoxNotifyCb(DisplayMessage d)
+            public WriteLogVoxNotifyCb(OnVoxNotification d)
             {
                 m_msgDelegate = d;
             }
-            protected DisplayMessage m_msgDelegate;
+            protected OnVoxNotification m_msgDelegate;
+
+            // Requirements for WriteLog to find your callback:
+            // a) It must have the arguments as show here: a 16 bit signed integer, and a string
+            // b) It MAY have a void return value,
+            // c) ...but it also MAY have a signed integer return value (short or int)
+            // d) Should it be declared to return an integer, if it returns non-zero (to WL 12.83 and later) then WriteLog 
+            // will cancel all further callbacks as if you called CancelMicVoxNotify. Return zero, and WriteLog continues.
+            // e) WriteLog will call the method declared as DispId of value 1 UNLESS it finds a method named as
+            // show here: MicVoxChanged.
             [ComVisible(true), DispId(1)]
             public void MicVoxChanged(short OnOff, string AudioState)
             {
@@ -149,7 +158,7 @@ namespace WriteLogAutomationDemo
             else  // We have connected to some WriteLog instance, so show our Form on the screen now.
             {
                 textBoxCWMemF2.Text = m_WriteLogDocument.GetFKeyMsgCw(0); // demo changing F-key memories
-                m_VoxCookie = m_WriteLogDocument.SetMicVoxNotify(new WriteLogVoxNotifyCb(new DisplayMessage(
+                m_VoxCookie = m_WriteLogDocument.SetMicVoxNotify(new WriteLogVoxNotifyCb(new OnVoxNotification(
                     OnIncomingNotification)
                     ));
             }
