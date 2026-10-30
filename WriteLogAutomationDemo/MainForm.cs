@@ -92,17 +92,28 @@ namespace WriteLogAutomationDemo
             catch
             {
             }
+            bool isControlSite = false;
+            // Second try to attach to a running instance of WriteLog as control site
+            if (null == m_WriteLogDocument) try
+            {
+                Object o = Marshal.GetActiveObject("WriteLog.ControlSite");
+                m_WriteLogDocument = (IWriteL)o;
+                isControlSite = true;
+            }
+            catch
+            {
+            }
 
-           /* WriteLog, by the way, has some system-wide state to be aware of when
-            * programming it:
-            * 
-            * A) EACH instance of WriteLog, when launched registers itself as the one-and-only
-            * instance that subsequent calls of GetActiveObject retrieve.
-            * 
-            * B) EACH instance of WriteLog checks to see if it is the ONLY instance running.
-            * Only in the case it is the ONLY does it attempt to initialize the stuff in
-            * its Setup/Ports dialog (i.e. interfaces to radios via COM ports.)
-            */
+            /* WriteLog, by the way, has some system-wide state to be aware of when
+             * programming it:
+             * 
+             * A) EACH instance of WriteLog, when launched registers itself as the one-and-only
+             * instance that subsequent calls of GetActiveObject retrieve.
+             * 
+             * B) EACH instance of WriteLog checks to see if it is the ONLY instance running.
+             * Only in the case it is the ONLY does it attempt to initialize the stuff in
+             * its Setup/Ports dialog (i.e. interfaces to radios via COM ports.)
+             */
 
             /* This sequence is unduly complicated because its a demo. 
             * For a "real" WriteLog automation server, it is unlikely it would need to do all 
@@ -115,7 +126,7 @@ namespace WriteLogAutomationDemo
             if (m_WriteLogDocument != null)
             {
                 if (MessageBox.Show(
-                    "WriteLog is running. Do automation on that running WriteLog?", 
+                    isControlSite ? "WriteLog is a control site. Do automation on that running WriteLog?" : "WriteLog is running. Do automation on that running WriteLog?", 
                     "WriteLog Automation Demo", MessageBoxButtons.YesNo) == DialogResult.No)
                     m_WriteLogDocument = null;
             }
@@ -188,20 +199,30 @@ namespace WriteLogAutomationDemo
 
         private void button1_Click(object sender, EventArgs e)
         {
+            var DigAsPair = m_WriteLogDocument.Phone4DigitsAsPairs;
+            DigAsPair ^= 1;
+            m_WriteLogDocument.Phone4DigitsAsPairs = DigAsPair;
+            var tts = m_WriteLogDocument.TTSPlaybackLengthPercent;
+            tts -= 2;
+            m_WriteLogDocument.TTSPlaybackLengthPercent = tts;
             var ent = m_WriteLogDocument.CreateEntry() as WriteLogClrTypes.ISingleEntry;
             ent = m_WriteLogDocument.GetCurrentEntry();
             ent.SetLogFrequencyEx(3, 144100.0, 144100.0, 0);
             ent.SetFieldN(3, "FN23");
             ent.Callsign = "W1AW";
             var d = ent.Dupe();
-            int i = 3;
+            d += 0; // Debug break place
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             // clean up our callback on microphone vox
             if (m_VoxCookie != 0 && null != m_WriteLogDocument)
-                m_WriteLogDocument.CancelMicVoxNotify(m_VoxCookie);
+                try
+                {
+                    m_WriteLogDocument.CancelMicVoxNotify(m_VoxCookie);
+                }
+                catch (Exception ) { } // silently ignore
             m_VoxCookie = 0;
         }
     }

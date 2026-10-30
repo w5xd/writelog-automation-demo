@@ -88,6 +88,7 @@ namespace WriteLogAutomationDemo
                 MessageBox.Show("Is not a dupe.", "WriteLog Dupe Check");
             else
                 MessageBox.Show("Is a dupe.", "WriteLog Dupe Check");
+            m_SingleEntry.SpotSelfNow("hi there");
         }
 
         // Take WriteLog's Entry Window state and populate our dialog items.
